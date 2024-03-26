@@ -5,23 +5,14 @@ import uvicorn
 from fastapi import Body, Depends, FastAPI, Header, HTTPException
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt
-from pydantic import BaseModel
 
-
-class User(BaseModel):
-    username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
-
-
-class Item(BaseModel):
-    name: str
-    description: str | None = None
-    price: float | None = None
-
+from app.types.item import Item
+from app.types.user import User
+from app.models.broadcast import Broadcast
+from app.database.mongo import init_db
 
 app = FastAPI()
+init_db(app, [Broadcast])
 
 
 @app.get("/")
@@ -86,6 +77,13 @@ def get_me_auth(
         "api_key": x_api_key,
         # "current_user": current_user,
     }
+
+
+@app.get("/database/")
+def get_something_on_database(
+    current_user: Annotated[str, Depends(get_auth_current_user)],
+):
+    return {}
 
 
 if __name__ == "__main__":
